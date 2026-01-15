@@ -22,19 +22,28 @@ That's it! You should see a welcome page with the course outline.
 ## Project Structure
 
 ```
-starter-project/
-├── package.json          # Project configuration and dependencies
-├── server.js            # Basic development server
-├── README.md            # This file
-├── public/              # Static files served by the web server
-│   ├── index.html       # Main HTML page
-│   └── styles.css       # Basic styling
-├── src/                 # Source code (you'll add files here)
-│   ├── app.js          # Main application entry point (currently empty)
-│   ├── models/         # Data models (Day 1+)
-│   ├── services/       # Business logic (Day 1+)
-│   └── utils/          # Utility functions (Day 1+)
-└── tests/              # Test files (Day 3+)
+project/
+├── package.json                       # Dependencies
+├── server.js                          # Express server
+├── requirements.md                    # User stories
+├── src/
+│   ├── models/
+│   │   ├── User.js                    # User model
+│   │   └── EnhancedTask.js            # Enhanced task model
+│   ├── repositories/
+│   │   ├── UserRepository.js          # User data access
+│   │   └── TaskRepository.js          # Task data access
+│   ├── controllers/
+│   │   ├── UserController.js          # User operations
+│   │   └── TaskController.js          # Task operations
+│   ├── views/
+│   │   └── TaskView.js                # UI management
+│   ├── utils/
+│   │   └── EnhancedStorageManager.js  # Storage management
+│   └── app.js                         # Main application
+└── public/
+    ├── index.html                     # Enhanced UI
+    └── styles.css                     # Responsive styles
 ```
 
 ## What You'll Build
