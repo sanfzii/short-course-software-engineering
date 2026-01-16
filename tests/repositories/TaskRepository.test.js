@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const TaskRepository = require('../../src/repositories/TaskRepository');
 
 // Mock buat EnhancedTask Model
