@@ -186,6 +186,74 @@ describe('EnhancedTask Model', () => {
             // Should only have one instance
             expect(task.tags.filter(tag => tag === 'urgent')).toHaveLength(1);
         });
+        
+        test('should update description successfully', () => {
+            // Arrange
+            const newDescription = 'Updated task description';
+            
+            // Act
+            task.updateDescription(newDescription);
+            
+            // Assert
+            expect(task.description).toBe(newDescription);
+        });
+        
+        test('should update priority successfully', () => {
+            // Act
+            task.updatePriority('high');
+            
+            // Assert
+            expect(task.priority).toBe('high');
+        });
+        
+        test('should throw error for invalid priority', () => {
+            // Act & Assert
+            expect(() => {
+                task.updatePriority('invalid-priority');
+            }).toThrow('Prioritas tidak valid');
+        });
+        
+        test('should assign task to user', () => {
+            // Arrange
+            const newAssigneeId = 'user-456';
+            
+            // Act
+            task.assignTo(newAssigneeId);
+            
+            // Assert
+            expect(task.assigneeId).toBe(newAssigneeId);
+        });
+        
+        test('should set estimated hours', () => {
+            // Act
+            task.setEstimatedHours(8);
+            
+            // Assert
+            expect(task.estimatedHours).toBe(8);
+        });
+        
+        test('should add time spent', () => {
+            // Act
+            task.addTimeSpent(2);
+            task.addTimeSpent(3);
+            
+            // Assert
+            expect(task.actualHours).toBe(5);
+        });
+        
+        test('should calculate progress percentage correctly', () => {
+            // Arrange
+            task.setEstimatedHours(10);
+            task.addTimeSpent(5);
+            
+            // Act & Assert
+            expect(task.progressPercentage).toBe(50);
+        });
+        
+        test('should return 0 progress when no estimated hours', () => {
+            // Act & Assert
+            expect(task.progressPercentage).toBe(0);
+        });
     });
     
     describe('Task Serialization', () => {
@@ -221,6 +289,67 @@ describe('EnhancedTask Model', () => {
             expect(restoredTask.tags).toEqual(originalTask.tags);
             expect(restoredTask.notes).toEqual(originalTask.notes);
             expect(restoredTask.dueDate.getTime()).toBe(originalTask.dueDate.getTime());
+        });
+    });
+
+    describe('Category Management', () => {
+        let task;
+        
+        beforeEach(() => {
+            const taskData = TestDataFactory.createValidTaskData();
+            task = new EnhancedTask(taskData.title, taskData.description, taskData.ownerId);
+        });
+        
+        test('should have default category', () => {
+            expect(task.category).toBe('personal');
+        });
+        
+        test('should update category successfully', () => {
+            // Act
+            task.updateCategory('work');
+            
+            // Assert
+            expect(task.category).toBe('work');
+            expect(task.updatedAt).toBeInstanceOf(Date);
+        });
+        
+        test('should throw error for invalid category', () => {
+            // Act & Assert
+            expect(() => {
+                task.updateCategory('invalid-category');
+            }).toThrow('Kategori tidak valid');
+        });
+        
+        test('should return available categories', () => {
+            // Act
+            const categories = EnhancedTask.getAvailableCategories();
+            
+            // Assert
+            expect(categories).toBeInstanceOf(Array);
+            expect(categories).toContain('work');
+            expect(categories).toContain('personal');
+            expect(categories).toContain('study');
+            expect(categories.length).toBeGreaterThan(0);
+        });
+        
+        test('should get category display name', () => {
+            // Arrange
+            task.updateCategory('work');
+            
+            // Act
+            const displayName = task.getCategoryDisplayName();
+            
+            // Assert
+            expect(displayName).toBe('Work & Business');
+        });
+        
+        test('should check if task is in category', () => {
+            // Arrange
+            task.updateCategory('study');
+            
+            // Act & Assert
+            expect(task.isInCategory('study')).toBe(true);
+            expect(task.isInCategory('work')).toBe(false);
         });
     });
 });

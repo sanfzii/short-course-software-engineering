@@ -237,4 +237,99 @@ describe('UserRepository', () => {
             expect(results).toHaveLength(0);
         });
     });
+    
+    describe('User Deletion', () => {
+        let testUser;
+        
+        beforeEach(() => {
+            const userData = TestDataFactory.createValidUserData();
+            testUser = userRepository.create(userData);
+        });
+        
+        test('should soft delete user (deactivate)', () => {
+            // Act
+            const result = userRepository.delete(testUser.id);
+            
+            // Assert
+            expect(result).toBe(true);
+            const user = userRepository.findById(testUser.id);
+            expect(user.isActive).toBe(false);
+        });
+        
+        test('should return false when deleting non-existent user', () => {
+            // Act
+            const result = userRepository.delete('non-existent-id');
+            
+            // Assert
+            expect(result).toBe(false);
+        });
+        
+        test('should hard delete user permanently', () => {
+            // Act
+            const result = userRepository.hardDelete(testUser.id);
+            
+            // Assert
+            expect(result).toBe(true);
+            const user = userRepository.findById(testUser.id);
+            expect(user).toBeNull();
+        });
+        
+        test('should return false when hard deleting non-existent user', () => {
+            // Act
+            const result = userRepository.hardDelete('non-existent-id');
+            
+            // Assert
+            expect(result).toBe(false);
+        });
+    });
+    
+    describe('User Statistics', () => {
+        beforeEach(() => {
+            // Create multiple users with different states
+            const users = [
+                { username: 'active1', email: 'active1@example.com', fullName: 'Active User 1' },
+                { username: 'active2', email: 'active2@example.com', fullName: 'Active User 2' },
+                { username: 'inactive', email: 'inactive@example.com', fullName: 'Inactive User' }
+            ];
+            
+            users.forEach((userData, index) => {
+                const user = userRepository.create(userData);
+                if (index === 2) {
+                    userRepository.delete(user.id); // Deactivate third user
+                }
+                if (index === 0) {
+                    userRepository.recordLogin(user.id); // Record login for first user
+                }
+            });
+        });
+        
+        test('should return correct user statistics', () => {
+            // Act
+            const stats = userRepository.getStats();
+            
+            // Assert
+            expect(stats).toHaveProperty('total');
+            expect(stats).toHaveProperty('active');
+            expect(stats).toHaveProperty('inactive');
+            expect(stats).toHaveProperty('recentLogins');
+            expect(stats.total).toBe(3);
+            expect(stats.active).toBe(2);
+            expect(stats.inactive).toBe(1);
+            expect(stats.recentLogins).toBeGreaterThanOrEqual(1);
+        });
+        
+        test('should count recent logins correctly', () => {
+            // Arrange - record login for another user
+            const allUsers = userRepository.findActive();
+            if (allUsers.length > 1) {
+                userRepository.recordLogin(allUsers[1].id);
+            }
+            
+            // Act
+            const stats = userRepository.getStats();
+            
+            // Assert
+            expect(stats.recentLogins).toBeGreaterThanOrEqual(1);
+        });
+    });
 });

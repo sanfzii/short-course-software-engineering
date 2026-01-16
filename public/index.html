@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Management System - Day 2</title>
+    <title>Task Management System</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="app-container">
-        <!-- Header dengan User Info -->
         <header class="app-header">
             <div class="header-content">
                 <h1>Task Management System</h1>
@@ -29,30 +28,24 @@
             </div>
         </header>
 
-        <!-- Messages Container -->
         <div id="messages" class="messages-container"></div>
 
-        <!-- Main Content -->
         <main class="main-content" id="mainContent" style="display: none;">
             
-            <!-- Task Statistics -->
             <section class="stats-section">
                 <h2>Dashboard</h2>
                 <div id="taskStats" class="stats-container">
-                    <!-- Stats akan di-render di sini -->
-                </div>
+                    </div>
             </section>
 
-            <!-- Quick Actions -->
             <section class="quick-actions">
                 <button id="showOverdueBtn" class="btn btn-warning">Lihat Overdue Tasks</button>
                 <button id="showDueSoonBtn" class="btn btn-info">Tasks Due Soon</button>
                 <button id="exportDataBtn" class="btn btn-outline">Export Data</button>
             </section>
 
-            <!-- Task Creation Form -->
             <section class="form-section">
-                <h2>Buat Task Baru</h2>
+                <h2>Create New Task</h2>
                 <form id="taskForm" class="task-form">
                     <div class="form-row">
                         <div class="form-group">
@@ -64,10 +57,11 @@
                             <label for="taskCategory">Kategori</label>
                             <select id="taskCategory" name="category">
                                 <option value="personal">Personal</option>
-                                <option value="work">Work</option>
-                                <option value="study">Study</option>
-                                <option value="health">Health</option>
-                                <option value="finance">Finance</option>
+                                <option value="work">Work & Business</option>
+                                <option value="study">Study & Learning</option>
+                                <option value="health">Health & Fitness</option>
+                                <option value="finance">Finance & Money</option>
+                                <option value="shopping">Shopping</option>
                                 <option value="other">Other</option>
                             </select>
                         </div>
@@ -110,8 +104,7 @@
                             <label for="taskAssignee">Assign ke</label>
                             <select id="taskAssignee" name="assigneeId">
                                 <option value="self">Diri Sendiri</option>
-                                <!-- Options akan diisi dari JavaScript -->
-                            </select>
+                                </select>
                         </div>
                     </div>
                     
@@ -119,7 +112,6 @@
                 </form>
             </section>
 
-            <!-- Search dan Filter -->
             <section class="search-filter-section">
                 <div class="search-container">
                     <h2>Cari & Filter Tasks</h2>
@@ -136,44 +128,29 @@
                     </div>
                 </div>
                 
-                <div class="filter-container">
-                    <h3>Filter berdasarkan:</h3>
-                    <div class="filter-groups">
-                        <div class="filter-group">
-                            <h4>Status</h4>
-                            <div class="filter-buttons">
-                                <button class="filter-btn active" data-filter="all">Semua</button>
-                                <button class="filter-btn" data-filter="pending">Pending</button>
-                                <button class="filter-btn" data-filter="in-progress">In Progress</button>
-                                <button class="filter-btn" data-filter="completed">Completed</button>
-                                <button class="filter-btn" data-filter="blocked">Blocked</button>
-                            </div>
-                        </div>
-                        
-                        <div class="filter-group">
-                            <h4>Prioritas</h4>
-                            <div class="filter-buttons">
-                                <button class="filter-btn" data-filter="urgent">Urgent</button>
-                                <button class="filter-btn" data-filter="high">High</button>
-                                <button class="filter-btn" data-filter="medium">Medium</button>
-                                <button class="filter-btn" data-filter="low">Low</button>
-                            </div>
-                        </div>
-                        
-                        <div class="filter-group">
-                            <h4>Kategori</h4>
-                            <div class="filter-buttons">
-                                <button class="filter-btn" data-filter="work">Work</button>
-                                <button class="filter-btn" data-filter="personal">Personal</button>
-                                <button class="filter-btn" data-filter="study">Study</button>
-                                <button class="filter-btn" data-filter="health">Health</button>
-                            </div>
+                <section class="filter-section">
+                    <div class="filter-buttons" style="margin-bottom: 20px;">
+                        <button class="filter-btn active" data-filter="all">All Tasks</button>
+                        <button class="filter-btn" data-filter="pending">Pending</button>
+                        <button class="filter-btn" data-filter="completed">Completed</button>
+                        <button class="filter-btn" data-filter="high">High Priority</button>
+                    </div>
+                    
+                    <div class="category-filters">
+                        <h3>By Category</h3>
+                        <div class="category-buttons">
+                            <button class="category-btn" data-category="personal">Personal</button>
+                            <button class="category-btn" data-category="work">Work</button>
+                            <button class="category-btn" data-category="study">Study</button>
+                            <button class="category-btn" data-category="health">Health</button>
+                            <button class="category-btn" data-category="finance">Finance</button>
+                            <button class="category-btn" data-category="shopping">Shopping</button>
+                            <button class="category-btn" data-category="other">Other</button>
                         </div>
                     </div>
-                </div>
+                </section>
             </section>
 
-            <!-- Task List -->
             <section class="tasks-section">
                 <div class="tasks-header">
                     <h2>Your Tasks</h2>
@@ -183,12 +160,10 @@
                     </div>
                 </div>
                 <div id="taskList" class="task-list">
-                    <!-- Tasks akan di-render di sini -->
-                </div>
+                    </div>
             </section>
         </main>
 
-        <!-- Registration Modal -->
         <div id="registerModal" class="modal" style="display: none;">
             <div class="modal-content">
                 <div class="modal-header">
@@ -216,14 +191,12 @@
             </div>
         </div>
 
-        <!-- Footer -->
         <footer class="app-footer">
             <p>&copy; 2024 Software Engineering Shortcourse - Day 2 Implementation</p>
             <p>MVC Pattern • Repository Pattern • Enhanced Models</p>
         </footer>
     </div>
 
-    <!-- Load JavaScript modules dalam urutan yang benar -->
     <script src="src/models/User.js"></script>
     <script src="src/models/EnhancedTask.js"></script>
     <script src="src/utils/StorageManager.js"></script>
@@ -235,4 +208,4 @@
     <script src="src/views/TaskView.js"></script>
     <script src="src/app.js"></script>
 </body>
-</html>
+</html>// Search input

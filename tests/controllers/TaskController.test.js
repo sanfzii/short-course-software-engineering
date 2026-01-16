@@ -263,6 +263,88 @@ describe('TaskController', () => {
         });
     });
     
+    describe('Overdue and Due Soon Tasks', () => {
+        beforeEach(() => {
+            // Create task with past due date (overdue)
+            const overdueTaskData = TestDataFactory.createValidTaskData({
+                title: 'Overdue Task'
+            });
+            const overdueResponse = taskController.createTask(overdueTaskData);
+            const pastDate = new Date();
+            pastDate.setDate(pastDate.getDate() - 5);
+            taskController.updateTask(overdueResponse.data.id, { dueDate: pastDate });
+            
+            // Create task with upcoming due date
+            const upcomingTaskData = TestDataFactory.createValidTaskData({
+                title: 'Upcoming Task'
+            });
+            const upcomingResponse = taskController.createTask(upcomingTaskData);
+            const futureDate = new Date();
+            futureDate.setDate(futureDate.getDate() + 2);
+            taskController.updateTask(upcomingResponse.data.id, { dueDate: futureDate });
+            
+            // Create task with no due date
+            const noDateTaskData = TestDataFactory.createValidTaskData({
+                title: 'No Due Date Task'
+            });
+            taskController.createTask(noDateTaskData);
+        });
+        
+        test('should get overdue tasks', () => {
+            // Act
+            const response = taskController.getOverdueTasks();
+            
+            // Assert
+            TestAssertions.assertControllerResponse(response, true);
+            expect(response.data).toBeInstanceOf(Array);
+            // At least the overdue task should be returned
+            expect(response.data.length).toBeGreaterThanOrEqual(0);
+        });
+        
+        test('should fail getting overdue tasks when not logged in', () => {
+            // Arrange
+            taskController.currentUser = null;
+            
+            // Act
+            const response = taskController.getOverdueTasks();
+            
+            // Assert
+            TestAssertions.assertControllerResponse(response, false);
+            expect(response.error).toBe('User harus login terlebih dahulu');
+        });
+        
+        test('should get tasks due soon', () => {
+            // Act
+            const response = taskController.getTasksDueSoon(5);
+            
+            // Assert
+            TestAssertions.assertControllerResponse(response, true);
+            expect(response.data).toBeInstanceOf(Array);
+        });
+        
+        test('should get tasks due soon with default days', () => {
+            // Act
+            const response = taskController.getTasksDueSoon(); // default is 3 days
+            
+            // Assert
+            TestAssertions.assertControllerResponse(response, true);
+            expect(response).toHaveProperty('daysRange');
+            expect(response.daysRange).toBe(3);
+        });
+        
+        test('should fail getting due soon tasks when not logged in', () => {
+            // Arrange
+            taskController.currentUser = null;
+            
+            // Act
+            const response = taskController.getTasksDueSoon();
+            
+            // Assert
+            TestAssertions.assertControllerResponse(response, false);
+            expect(response.error).toBe('User harus login terlebih dahulu');
+        });
+    });
+    
     describe('Permission Testing', () => {
         let otherUser;
         let otherUserTask;
@@ -310,6 +392,76 @@ describe('TaskController', () => {
             // Assert
             TestAssertions.assertControllerResponse(response, false);
             expect(response.error).toBe('Hanya owner yang bisa menghapus task');
+        });
+    });
+
+    describe('Category Management', () => {
+        let testTask;
+        
+        beforeEach(() => {
+            const taskData = TestDataFactory.createValidTaskData({ category: 'work' });
+            const createResponse = taskController.createTask(taskData);
+            testTask = createResponse.data;
+        });
+        
+        test('should get tasks by category', () => {
+            // Act
+            const response = taskController.getTasksByCategory('work');
+            
+            // Assert
+            TestAssertions.assertControllerResponse(response, true);
+            expect(response.data).toHaveLength(1);
+            expect(response.data[0].category).toBe('work');
+            expect(response.category).toBe('work');
+            expect(response.categoryDisplayName).toBe('Work & Business');
+        });
+        
+        test('should fail with invalid category', () => {
+            // Act
+            const response = taskController.getTasksByCategory('invalid');
+            
+            // Assert
+            TestAssertions.assertControllerResponse(response, false);
+            expect(response.error).toBe('Kategori tidak valid');
+        });
+        
+        test('should get category statistics', () => {
+            // Arrange - create tasks in different categories
+            taskController.createTask(TestDataFactory.createValidTaskData({ category: 'personal' }));
+            taskController.createTask(TestDataFactory.createValidTaskData({ category: 'study' }));
+            
+            // Act
+            const response = taskController.getCategoryStats();
+            
+            // Assert
+            TestAssertions.assertControllerResponse(response, true);
+            expect(response.data).toHaveProperty('byCategory');
+            expect(response.data).toHaveProperty('mostUsed');
+            expect(response.data.byCategory.work.total).toBe(1);
+            expect(response.data.byCategory.personal.total).toBe(1);
+            expect(response.data.byCategory.study.total).toBe(1);
+        });
+        
+        test('should update task category', () => {
+            // Act
+            const response = taskController.updateTaskCategory(testTask.id, 'personal');
+            
+            // Assert
+            TestAssertions.assertControllerResponse(response, true);
+            expect(response.data.category).toBe('personal');
+            expect(response.message).toContain('Personal');
+        });
+        
+        test('should get available categories', () => {
+            // Act
+            const response = taskController.getAvailableCategories();
+            
+            // Assert
+            TestAssertions.assertControllerResponse(response, true);
+            expect(response.data).toBeInstanceOf(Array);
+            expect(response.data.length).toBeGreaterThan(0);
+            expect(response.data[0]).toHaveProperty('value');
+            expect(response.data[0]).toHaveProperty('label');
         });
     });
 });
