@@ -1,8 +1,8 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable no-undef */
 /**
  * Day 2 Main Application - MVC Implementation
- * 
- * Orchestrates semua komponen:
+ * * Orchestrates semua komponen:
  * - Storage Manager
  * - Repositories
  * - Controllers
@@ -54,6 +54,9 @@ function initializeApp() {
         
         // Show login section
         showLoginSection();
+        
+        // NEW: Render initial category stats (jika ada data tersimpan)
+        renderCategoryStats();
         
         console.log('✅ Day 2 Application initialized successfully!');
         
@@ -129,6 +132,14 @@ function setupAuthEventListeners() {
     if (refreshTasks) {
         refreshTasks.addEventListener('click', () => app.taskView.refresh());
     }
+
+    // ==========================================
+    // NEW: Category Filter Listeners (Day 4)
+    // ==========================================
+    const categoryButtons = document.querySelectorAll('.category-btn');
+    categoryButtons.forEach(btn => {
+        btn.addEventListener('click', handleCategoryFilter);
+    });
 }
 
 /**
@@ -274,6 +285,9 @@ function showMainContent() {
     if (welcomeMessage && app.currentUser) {
         welcomeMessage.textContent = `Selamat datang, ${app.currentUser.fullName || app.currentUser.username}!`;
     }
+
+    // NEW: Update category stats saat user masuk
+    renderCategoryStats();
 }
 
 /**
@@ -422,6 +436,222 @@ window.addEventListener('unhandledrejection', (event) => {
     console.error('Unhandled promise rejection:', event.reason);
     showMessage('Terjadi kesalahan pada aplikasi', 'error');
 });
+
+// ==========================================
+// NEW: Day 4 Features Implementation
+// ==========================================
+
+/**
+ * Handle category filter changes
+ */
+function handleCategoryFilter(event) {
+    const category = event.target.dataset.category;
+    
+    // Update active category button
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    // Clear other filters
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Render tasks filtered by category
+    renderTaskList('category', category);
+}
+
+/**
+ * Update renderTaskList function untuk support category filtering
+ * Updated for Day 2 Compatibility: Uses app.taskRepository
+ */
+function renderTaskList(filterType = 'all', filterValue = null) {
+    const taskListContainer = document.getElementById('taskList');
+    if (!taskListContainer) return;
+    
+    // Gunakan repository dari app instance
+    let tasks = app.taskRepository.findAll();
+    
+    // Apply filters
+    switch (filterType) {
+    case 'pending':
+        tasks = tasks.filter(task => !task.completed);
+        break;
+    case 'completed':
+        tasks = tasks.filter(task => task.completed);
+        break;
+    case 'high':
+        tasks = tasks.filter(task => task.priority === 'high');
+        break;
+    case 'medium':
+        tasks = tasks.filter(task => task.priority === 'medium');
+        break;
+    case 'low':
+        tasks = tasks.filter(task => task.priority === 'low');
+        break;
+    case 'category':
+        tasks = tasks.filter(task => task.category === filterValue);
+        break;
+    }
+    
+    // Sort tasks by creation date (newest first)
+    tasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
+    if (tasks.length === 0) {
+        const filterText = filterType === 'category' ? 
+            `in ${filterValue} category` : 
+            `with ${filterType} filter`;
+            
+        taskListContainer.innerHTML = `
+            <div class="empty-state">
+                <p>No tasks found ${filterText}</p>
+                <small>Create your first task using the form above</small>
+            </div>
+        `;
+        return;
+    }
+    
+    const taskHTML = tasks.map(task => createTaskHTML(task)).join('');
+    taskListContainer.innerHTML = taskHTML;
+}
+
+/**
+ * Update createTaskHTML function untuk include category display
+ * Updated for Day 2 Compatibility: Uses app.taskController events in onclick
+ */
+function createTaskHTML(task) {
+    // Helper untuk escape HTML agar aman
+    const escapeHtml = (unsafe) => {
+        return unsafe
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    };
+
+    const priorityClass = `priority-${task.priority}`;
+    const completedClass = task.completed ? 'completed' : '';
+    // Handle category jika belum ada (backward compatibility)
+    const category = task.category || 'other';
+    const categoryClass = `category-${category}`;
+    const createdDate = new Date(task.createdAt).toLocaleDateString();
+    
+    // Get category display name
+    const categoryDisplayNames = {
+        'work': 'Work',
+        'personal': 'Personal',
+        'study': 'Study',
+        'health': 'Health',
+        'finance': 'Finance',
+        'shopping': 'Shopping',
+        'other': 'Other'
+    };
+    
+    const categoryDisplay = categoryDisplayNames[category] || category;
+    
+    return `
+        <div class="task-item ${priorityClass} ${completedClass}" data-task-id="${task.id}">
+            <div class="task-content">
+                <div class="task-header">
+                    <h3 class="task-title">${escapeHtml(task.title)}</h3>
+                    <div class="task-badges">
+                        <span class="task-priority">${task.priority}</span>
+                        <span class="task-category ${categoryClass}">${categoryDisplay}</span>
+                    </div>
+                </div>
+                ${task.description ? `<p class="task-description">${escapeHtml(task.description)}</p>` : ''}
+                <div class="task-meta">
+                    <small>Created: ${createdDate}</small>
+                    ${task.completed ? `<small>Completed: ${new Date(task.updatedAt).toLocaleDateString()}</small>` : ''}
+                </div>
+            </div>
+            <div class="task-actions">
+                <button class="btn btn-toggle" onclick="app.taskController.toggleTask('${task.id}'); app.taskView.refresh();" title="${task.completed ? 'Mark incomplete' : 'Mark complete'}">
+                    ${task.completed ? '↶' : '✓'}
+                </button>
+                <button class="btn btn-delete" onclick="app.taskController.deleteTask('${task.id}'); app.taskView.refresh();" title="Delete task">
+                    🗑️
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Render category statistics
+ * Updated for Day 2 Compatibility: Uses app.taskRepository
+ */
+function renderCategoryStats() {
+    // Cari container categoryStats, jika belum ada inject ke stats-section
+    let statsContainer = document.getElementById('categoryStats');
+    
+    // Fallback: jika container belum ada di HTML, kita coba inject manual (safety)
+    if (!statsContainer) {
+        const mainStats = document.getElementById('taskStats');
+        if (mainStats && mainStats.parentNode) {
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = '<div id="categoryStats"></div>';
+            mainStats.parentNode.appendChild(wrapper.firstChild);
+            statsContainer = document.getElementById('categoryStats');
+        } else {
+            return; // Tidak bisa render
+        }
+    }
+    
+    const tasks = app.taskRepository.findAll();
+    const categoryStats = {};
+    
+    // Initialize categories
+    const categories = ['work', 'personal', 'study', 'health', 'finance', 'shopping', 'other'];
+    categories.forEach(cat => {
+        categoryStats[cat] = { total: 0, completed: 0 };
+    });
+    
+    // Count tasks by category
+    tasks.forEach(task => {
+        const cat = task.category || 'other';
+        if (categoryStats[cat]) {
+            categoryStats[cat].total++;
+            if (task.completed) {
+                categoryStats[cat].completed++;
+            }
+        }
+    });
+    
+    // Render stats
+    const statsHTML = Object.entries(categoryStats)
+        .filter(([category, stats]) => stats.total > 0)
+        .map(([category, stats]) => {
+            const displayNames = {
+                'work': 'Work',
+                'personal': 'Personal', 
+                'study': 'Study',
+                'health': 'Health',
+                'finance': 'Finance',
+                'shopping': 'Shopping',
+                'other': 'Other'
+            };
+            
+            return `
+                <div class="category-stat-item">
+                    <h4>${displayNames[category]}</h4>
+                    <div class="stat-number">${stats.total}</div>
+                    <small>${stats.completed} completed</small>
+                </div>
+            `;
+        }).join('');
+    
+    if (statsHTML) {
+        statsContainer.innerHTML = `
+            <h3>Tasks by Category</h3>
+            <div class="category-stats">${statsHTML}</div>
+        `;
+    } else {
+        statsContainer.innerHTML = '';
+    }
+}
 
 // Initialize app when DOM is ready
 document.addEventListener('DOMContentLoaded', initializeApp);
