@@ -15,6 +15,7 @@ A collaborative task management application built with vanilla JavaScript, demon
 ## 🛠️ Getting Started
 
 ### Prerequisites
+<<<<<<< HEAD
 - Node.js 14+ installed
 - Git installed and configured
 - Modern web browser
@@ -28,6 +29,23 @@ cd task-management-system
 # Install dependencies
 npm install
 
+=======
+
+- Node.js 14+ installed
+- Git installed and configured
+- Modern web browser
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/your-username/task-management-system.git
+cd task-management-system
+
+# Install dependencies
+npm install
+
+>>>>>>> feature/task-search
 # Start development server
 npm start
 ```
@@ -35,6 +53,7 @@ npm start
 Visit http://localhost:3000 to see the application.
 
 ### Development Commands
+<<<<<<< HEAD
 ```bash
 npm start          # Start development server
 npm test           # Run test suite
@@ -73,11 +92,57 @@ public/
 └── assets/          # Static assets
 ```
 
+=======
+
+```bash
+npm start          # Start development server
+npm test           # Run test suite
+npm run test:watch # Run tests in watch mode
+npm run test:coverage # Run tests with coverage report
+```
+
+## 🏗️ Architecture
+
+This project demonstrates key software engineering principles:
+
+- **MVC Pattern**: Separation of Model, View, and Controller
+- **Repository Pattern**: Data access abstraction
+- **Dependency Injection**: Loose coupling between components
+- **Test-Driven Development**: Comprehensive test coverage
+- **Version Control**: Git workflow with feature branches
+
+### Project Structure
+
+```
+src/
+├── models/          # Data models and business logic
+├── controllers/     # Request handling and coordination
+├── repositories/    # Data access layer
+├── services/        # Business logic services
+└── utils/           # Utility functions
+
+tests/
+├── models/          # Model unit tests
+├── controllers/     # Controller integration tests
+├── repositories/    # Repository tests
+└── helpers/         # Test utilities
+
+public/
+├── index.html       # Main HTML file
+├── styles.css       # Application styles
+└── assets/          # Static assets
+```
+
+>>>>>>> feature/task-search
 ## 🤝 Contributing
 
 We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ### Quick Start for Contributors
+<<<<<<< HEAD
+=======
+
+>>>>>>> feature/task-search
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
 3. Make your changes and add tests
@@ -101,6 +166,10 @@ npm run test:coverage
 ```
 
 ### Test Structure
+<<<<<<< HEAD
+=======
+
+>>>>>>> feature/task-search
 - **Unit Tests**: Test individual components in isolation
 - **Integration Tests**: Test component interactions
 - **Test Utilities**: Shared test helpers and factories

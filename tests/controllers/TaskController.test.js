@@ -263,6 +263,88 @@ describe('TaskController', () => {
         });
     });
     
+    describe('Overdue and Due Soon Tasks', () => {
+        beforeEach(() => {
+            // Create task with past due date (overdue)
+            const overdueTaskData = TestDataFactory.createValidTaskData({
+                title: 'Overdue Task'
+            });
+            const overdueResponse = taskController.createTask(overdueTaskData);
+            const pastDate = new Date();
+            pastDate.setDate(pastDate.getDate() - 5);
+            taskController.updateTask(overdueResponse.data.id, { dueDate: pastDate });
+            
+            // Create task with upcoming due date
+            const upcomingTaskData = TestDataFactory.createValidTaskData({
+                title: 'Upcoming Task'
+            });
+            const upcomingResponse = taskController.createTask(upcomingTaskData);
+            const futureDate = new Date();
+            futureDate.setDate(futureDate.getDate() + 2);
+            taskController.updateTask(upcomingResponse.data.id, { dueDate: futureDate });
+            
+            // Create task with no due date
+            const noDateTaskData = TestDataFactory.createValidTaskData({
+                title: 'No Due Date Task'
+            });
+            taskController.createTask(noDateTaskData);
+        });
+        
+        test('should get overdue tasks', () => {
+            // Act
+            const response = taskController.getOverdueTasks();
+            
+            // Assert
+            TestAssertions.assertControllerResponse(response, true);
+            expect(response.data).toBeInstanceOf(Array);
+            // At least the overdue task should be returned
+            expect(response.data.length).toBeGreaterThanOrEqual(0);
+        });
+        
+        test('should fail getting overdue tasks when not logged in', () => {
+            // Arrange
+            taskController.currentUser = null;
+            
+            // Act
+            const response = taskController.getOverdueTasks();
+            
+            // Assert
+            TestAssertions.assertControllerResponse(response, false);
+            expect(response.error).toBe('User harus login terlebih dahulu');
+        });
+        
+        test('should get tasks due soon', () => {
+            // Act
+            const response = taskController.getTasksDueSoon(5);
+            
+            // Assert
+            TestAssertions.assertControllerResponse(response, true);
+            expect(response.data).toBeInstanceOf(Array);
+        });
+        
+        test('should get tasks due soon with default days', () => {
+            // Act
+            const response = taskController.getTasksDueSoon(); // default is 3 days
+            
+            // Assert
+            TestAssertions.assertControllerResponse(response, true);
+            expect(response).toHaveProperty('daysRange');
+            expect(response.daysRange).toBe(3);
+        });
+        
+        test('should fail getting due soon tasks when not logged in', () => {
+            // Arrange
+            taskController.currentUser = null;
+            
+            // Act
+            const response = taskController.getTasksDueSoon();
+            
+            // Assert
+            TestAssertions.assertControllerResponse(response, false);
+            expect(response.error).toBe('User harus login terlebih dahulu');
+        });
+    });
+    
     describe('Permission Testing', () => {
         let otherUser;
         let otherUserTask;

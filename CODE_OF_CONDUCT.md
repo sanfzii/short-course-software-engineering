@@ -28,4 +28,8 @@ Project maintainers are responsible for clarifying the standards of acceptable b
 
 ## Attribution
 
+<<<<<<< HEAD
 This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org), version 1.4.
+=======
+This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org), version 1.4.0
+>>>>>>> feature/task-search
